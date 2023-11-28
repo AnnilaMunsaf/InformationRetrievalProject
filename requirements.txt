@@ -1,2 +1,10 @@
-lucene
-solr
+pandas
+numpy
+spacy
+scikit-learn
+matplotlib
+plotly
+scipy
+wordcloud
+gensim
+nltk
