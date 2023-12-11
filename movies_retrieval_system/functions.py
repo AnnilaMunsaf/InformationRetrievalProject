@@ -91,4 +91,17 @@ def calculate_similarity_with_tfid_using_inverted_index(user_input_value, movie_
     # Sort by similarity scores in descending order
     relevant_movies = relevant_movies.sort_values(by=similarity_column, ascending=False)
 
-    return relevant_movies[['Release Year', 'Title', similarity_column, 'Preprocessed_plot']]
+    # Prepare the result string
+    result_str = ""
+    for idx, (_, movie) in enumerate(relevant_movies.iterrows(), start=1):
+        if idx > 10:
+            break  # Stop after displaying the top 10 movies
+
+        year = movie['Release Year']
+        title = movie['Title']
+        score = movie['Similarity (TF-IDF)']
+        result_str += f"{idx}. {title} [{year}] - Similarity: {score:.4f}\n"
+
+    return result_str
+
+
