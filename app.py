@@ -1,6 +1,5 @@
 import streamlit as st
 from movies_retrieval_system.functions import calculate_similarity_with_tfid_using_inverted_index
-from movies_retrieval_system.functions import preprocess
 from movies_retrieval_system.data_processing import process_movie_data
 import requests
 # Load processed data
@@ -16,13 +15,12 @@ def retrieve_movies_solr(user_query):
     with st.spinner("Loading..."):
         keywords = user_query.replace(" ", "%2C")
 
-        print(keywords)
-
+        #print(keywords)
 
         solr_url = "http://localhost:8983/solr/movies_retrieval_core/select?fl=*%2Cscore&indent=true&q.op=OR&q=Plot%3A" + \
               keywords + "&rows=10&useParams="
 
-        print(solr_url)
+        #print(solr_url)
 
         result = requests.get(url=solr_url).json()
         movies = result.get('response', {}).get('docs', [])
