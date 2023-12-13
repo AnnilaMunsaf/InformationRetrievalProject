@@ -2,7 +2,7 @@ import streamlit as st
 from movies_retrieval_system_genre.functions import calculate_similarity_with_tfid, get_similar_movies
 from movies_retrieval_system_genre.data_processing import process_movie_data
 import requests
-
+from functools import lru_cache
 # Load processed data
 movies_df, inverted_index_list = process_movie_data()
 
@@ -24,14 +24,13 @@ def retrieve_movies_solr(user_query):
 st.title("Movie Information Retrieval")
 
 # User input
-query = st.text_input("Enter Query:")
+st.session_state.query = st.text_input("Enter Query:")
 retrieval_method = st.radio("Select Ranking Method:", ["Solr", "Cosine Similarity", "Jaccard Similarity"])
 
 # Search button
-search_button = st.button("Search")
 
-# Retrieve movies based on user input and selected method when the button is clicked
-if search_button:
+def get_movies(query):
+    # Retrieve movies based on user input and selected method when the button is clicked
     if not query:
         st.warning("Please enter a query.")
     elif retrieval_method == "Solr":
@@ -40,32 +39,36 @@ if search_button:
         pass
     elif retrieval_method == "Jaccard Similarity":
         # Retrieve movies using Jaccard Similarity
-        # Retrieve movies based on user input
-        results = retrieve_movies_jaccard_similarity(query)
-        # Retrieve movies using Cosine Similarity
-        # Retrieve movies based on user input
+        st.session_state.results = retrieve_movies_jaccard_similarity(query)
     else:
-        results = retrieve_movies_jaccard_similarity(query)
+        st.session_state.results = retrieve_movies_jaccard_similarity(query)
 
 
-    if query:
-        # Display results
-        if not results.empty:
-            movie_titles_year = results.head(20)
-            movie_titles_year['MovieInfo'] = results['Title'] + ' (' + results['Release Year'].astype(str) + ')'
-            # Create a dropdown for the user to select a movie
-            selected_movie = st.selectbox("Select a movie:", movie_titles_year['MovieInfo'].tolist())
+def show():
+    st.session_state.results = None
+    st.button("Search", on_click=get_movies(st.session_state.query))
 
-            # Display details of the selected movie
-            if selected_movie:
-                selected_movie_title = selected_movie.split(' (')[0]
-                selected_movie_details = movie_titles_year[movie_titles_year['Title'] == selected_movie_title].iloc[0]
-                release_year = selected_movie_details['Release Year']
-                # similarity_score = selected_movie_details._3
+    if st.session_state.results is not None:
+        movie_titles_year = st.session_state.results.head(20)
+        movie_titles_year['MovieInfo'] = st.session_state.results['Title'] + ' (' + st.session_state.results['Release Year'].astype(str) + ')'
 
-                st.write(f"Selected Movie: {selected_movie}")
-                st.header("10 Similar Recommended Movies:")
-                similar_movies = get_similar_movies(selected_movie_title, release_year, results)
+    # Create a dropdown for the user to select a movie
+        st.session_state.selected_movie = st.selectbox("Select a movie:", movie_titles_year['MovieInfo'].tolist(), index=None, placeholder="Select a movie",)
+        st.write(f"Selected Movie: {st.session_state.selected_movie}")
+        # Display details of the selected movie
+        if st.button("Show Similar Movies") and st.session_state.selected_movie is not None:
+            selected_movie_title, release_year_str = st.session_state.selected_movie.split('(')
+            selected_movie_title = selected_movie_title.strip()
+            release_year = release_year_str.rstrip(')').strip()
+
+            # selected_movie_details = movie_titles_year[(movie_titles_year['Release Year'] == int(release_year)) &
+            #                                            (movie_titles_year['Title'] == selected_movie_title.strip())].iloc[0]
+
+            st.header("10 Similar Recommended Movies:")
+
+            # Check if similar movies list is not empty
+            similar_movies = get_similar_movies(selected_movie_title, release_year, st.session_state.results)
+            if not similar_movies.empty:
                 for idx, movie in enumerate(similar_movies.itertuples(), start=1):
                     if idx > 10:
                         break  # Stop after displaying the top 10 movies
@@ -74,10 +77,9 @@ if search_button:
                     title = getattr(movie, 'Title', '')
 
                     st.write(f"{idx}. {title} ({release_year})")
-                        # f"{idx}. {title} ({release_year}) - Similarity: {similarity_score:.4f}")
+            else:
+                st.info("No similar movies found.")
 
 
-    else:
-            st.warning("No movies found.")
 
-
+show()

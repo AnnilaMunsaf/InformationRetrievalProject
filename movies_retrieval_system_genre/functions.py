@@ -9,6 +9,12 @@ import pandas as pd
 import numpy as np
 from sklearn.metrics import jaccard_score
 from sklearn.feature_extraction.text import CountVectorizer
+from itertools import chain, combinations
+
+def powerset(iterable):
+    s = list(iterable)
+    return chain.from_iterable(combinations(s, r) for r in range(len(s) + 1))
+
 # Function to preprocess a list of words
 def preprocess(text):
     # Tokenize and remove stopwords
@@ -111,13 +117,28 @@ def calculate_similarity_with_jaccard(user_input_value, movie_df):
 
     return movie_df[['Release Year', 'Title', 'Genre', similarity_column, 'Levenstein distance', 'Preprocessed_title']]
 
+
 def get_similar_movies(selected_movie_title, release_year, results):
-    selected_movie_genre = results.at[results[results["Title"] == selected_movie_title].index[0], "Genre"]
-    movies_genre_df = results[results["Genre"].str.contains(selected_movie_genre, case=False)]
+    selected_movie_title = selected_movie_title.strip()
+    selected_movie_genre = results.loc[(results['Title'] == selected_movie_title) &
+                                       (results['Release Year'] == int(release_year))].iloc[0]['Genre']
+
+    selected_genres = [genre.strip() for genre in selected_movie_genre.split(',')]
+
+    # Generate all possible combinations of genres
+    all_combinations = list(powerset(selected_genres))
+
+    # Convert each combination back to a string
+    all_combination_strings = [', '.join(combination) for combination in reversed(all_combinations) if combination]
+
+    movies_genre_df = pd.DataFrame()
+    for combination_string in all_combination_strings:
+        movie = results[results["Genre"].str.contains(combination_string, case=False, na=False)]
+        movies_genre_df = pd.concat([movies_genre_df, movie], ignore_index=True)
+
     movies_genre_df = movies_genre_df.drop(movies_genre_df[
                                                (movies_genre_df['Title'] == selected_movie_title) & (
-                                                           movies_genre_df['Release Year'] == release_year)
+                                                       movies_genre_df['Release Year'] == int(release_year))
                                                ].index)
-
 
     return movies_genre_df.head(10)
