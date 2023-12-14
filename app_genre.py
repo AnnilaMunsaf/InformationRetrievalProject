@@ -79,17 +79,21 @@ def show():
             movie_titles_year['MovieInfo'] = st.session_state.results['Title'] + ' (' + st.session_state.results['Release Year'].astype(str) + ')'
 
         # Create a dropdown for the user to select a movie
+            selected_movie_title = None
+            release_year = None
             st.session_state.selected_movie = st.selectbox("Select a movie:", movie_titles_year['MovieInfo'].tolist(), index=None, placeholder="Select a movie",)
             st.write(f"Selected Movie: {st.session_state.selected_movie}")
-            # Display details of the selected movie
-            if st.button("Show Similar Movies") and st.session_state.selected_movie is not None:
+
+            if st.session_state.selected_movie is not None:
                 selected_movie_title, release_year_str = st.session_state.selected_movie.split('(')
                 selected_movie_title = selected_movie_title.strip()
                 release_year = release_year_str.rstrip(')').strip()
 
-                # selected_movie_details = movie_titles_year[(movie_titles_year['Release Year'] == int(release_year)) &
-                #                                            (movie_titles_year['Title'] == selected_movie_title.strip())].iloc[0]
-
+                st.session_state.selected_movie_genre = st.session_state.results.loc[(st.session_state.results['Title'] == selected_movie_title) &
+                                                   (st.session_state.results['Release Year'] == int(release_year))].iloc[0]['Genre']
+                st.write(f"Genre of Movie: {st.session_state.selected_movie_genre}")
+            # Display details of the selected movie
+            if st.button("Show Similar Movies") and st.session_state.selected_movie is not None:
                 st.header("10 Similar Recommended Movies:")
 
                 # Check if similar movies list is not empty
