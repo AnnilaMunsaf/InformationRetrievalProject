@@ -2,6 +2,8 @@ import streamlit as st
 from movies_retrieval_system_genre.functions import calculate_similarity_with_tfid, get_similar_movies
 from movies_retrieval_system_genre.data_processing import process_movie_data
 import requests
+import pandas as pd
+
 from functools import lru_cache
 # Load processed data
 movies_df, inverted_index_list = process_movie_data()
@@ -18,8 +20,27 @@ def retrieve_movies_jaccard_similarity(user_query):
     return result
 
 def retrieve_movies_solr(user_query):
-    return ["Solr Movie 1", "Solr Movie 2", "Solr Movie 3", "Solr Movie 4", "Solr Movie 5", "Solr Movie 6", "Solr Movie 7", "Solr Movie 8", "Solr Movie 9", "Solr Movie 10"]
+    with st.spinner("Loading..."):
+        keywords = user_query.replace(" ", "%2C")
 
+        solr_url = "http://localhost:8983/solr/movies_retrieval_core/select?fl=*%2Cscore&indent=true&q.op=OR&q=Plot%3A" + \
+              keywords + "&rows=10&useParams="
+
+        result = requests.get(url=solr_url).json()
+        movies = result.get('response', {}).get('docs', [])
+
+        result_list = []
+        for idx, movie in enumerate(movies[:10], start=1):
+            if idx > 10:
+                break  # Stop after displaying the top 10 movies
+
+            title = movie.get('Title', [''])[0]
+            year = str(movie.get('Release_Year', [''])[0])
+            score = float(movie.get('score', 0.0))  # Assuming score is a numerical value
+
+            result_list.append({'Release Year': year, 'Title': title, 'score': score})
+
+        return pd.DataFrame(result_list)
 # Streamlit UI
 st.title("Movie Information Retrieval")
 
@@ -35,7 +56,7 @@ def get_movies(query):
         st.warning("Please enter a query.")
     elif retrieval_method == "Solr":
         # Implement Solr retrieval logic here if needed
-        # results = retrieve_movies_solr(query)
+        st.session_state.results = retrieve_movies_solr(query)
         pass
     elif retrieval_method == "Jaccard Similarity":
         # Retrieve movies using Jaccard Similarity
@@ -49,6 +70,7 @@ def show():
     st.button("Search", on_click=get_movies(st.session_state.query))
 
     if st.session_state.results is not None:
+        print(st.session_state.results)
         movie_titles_year = st.session_state.results.head(20)
         movie_titles_year['MovieInfo'] = st.session_state.results['Title'] + ' (' + st.session_state.results['Release Year'].astype(str) + ')'
 

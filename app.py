@@ -5,7 +5,6 @@ import requests
 # Load processed data
 movies_df, inverted_index_list = process_movie_data()
 
-# Define your information retrieval function
 def retrieve_movies_cosine_similarity(user_query):
     with st.spinner("Loading..."):
         result = calculate_similarity_with_tfid_using_inverted_index(user_query, movies_df, inverted_index_list)
@@ -42,26 +41,51 @@ def retrieve_movies_solr(user_query):
 st.title("Movie Information Retrieval")
 
 # User input
-query = st.text_input("Enter Query:")
+st.session_state.query = st.text_input("Enter Query:")
 retrieval_method = st.radio("Select Ranking Method:", ["Solr", "Cosine Similarity"])
 
-# Search button
-search_button = st.button("Search")
-
-# Retrieve movies based on user input and selected method when the button is clicked
-if search_button:
+def get_movies(query):
+    # Retrieve movies based on user input and selected method when the button is clicked
     if not query:
         st.warning("Please enter a query.")
+    elif retrieval_method == "Solr":
+        # Implement Solr retrieval logic here if needed
+        st.session_state.results = retrieve_movies_solr(query)
     else:
-        # Retrieve movies based on the selected method
-        if retrieval_method == "Solr":
-            results = retrieve_movies_solr(query)
-        else:
-            results = retrieve_movies_cosine_similarity(query)
+        st.session_state.results = retrieve_movies_cosine_similarity(query)
 
-        # Display results
-        st.header("Top 10 Movies:")
-        if results:
-            st.write(results)
-        else:
-            st.warning("No movies found.")
+# # Search button
+# search_button = st.button("Search")
+#
+# # Retrieve movies based on user input and selected method when the button is clicked
+# if search_button:
+#     if not query:
+#         st.warning("Please enter a query.")
+#     else:
+#         # Retrieve movies based on the selected method
+#         if retrieval_method == "Solr":
+#             results = retrieve_movies_solr(query)
+#         else:
+#             results = retrieve_movies_cosine_similarity(query)
+#
+#         # Display results
+#         st.header("Top 10 Movies:")
+#         if results:
+#             st.write(results)
+#         else:
+#             st.warning("No movies found.")
+
+
+def show():
+    st.session_state.results = None
+    st.button("Search", on_click=get_movies(st.session_state.query))
+
+    st.header("Top 10 Movies:")
+
+
+    if st.session_state.results is not None:
+        st.write(st.session_state.results)
+    else:
+        st.warning("No movies found.")
+
+show()
