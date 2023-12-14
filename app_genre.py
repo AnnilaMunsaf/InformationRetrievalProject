@@ -23,7 +23,7 @@ def retrieve_movies_solr(user_query):
     with st.spinner("Loading..."):
         keywords = user_query.replace(" ", "%2C")
 
-        solr_url = "http://localhost:8983/solr/movies_retrieval_core/select?fl=*%2Cscore&indent=true&q.op=OR&q=Plot%3A" + \
+        solr_url = "http://localhost:8983/solr/movies_retrieval_core/select?fl=*%2Cscore&indent=true&q.op=OR&q=Title%3A" + \
               keywords + "&rows=10&useParams="
 
         result = requests.get(url=solr_url).json()
