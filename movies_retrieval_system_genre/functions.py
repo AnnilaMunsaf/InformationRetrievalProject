@@ -46,7 +46,7 @@ def calculate_jaccard_similarity(user_vector, movie_vectors):
 
 def levenstein_distances(preprocessed_user_input, movie_df):
     # Calculate Levenshtein distance for each movie title
-    distances = [lev.distance(preprocessed_user_input, title) for title in movie_df['Preprocessed_title']]
+    distances = [lev.distance(preprocessed_user_input, title) for title in movie_df['Preprocessed_Title']]
 
     # Add distances to the DataFrame
     movie_df['Levenstein distance'] = distances
@@ -67,15 +67,12 @@ def create_inverted_index(df):
     return inverted_index
 
 def calculate_similarity_with_tfid(user_input_value, movie_df):
-    # Preprocess movie plots
-    movie_df['Preprocessed_title'] = movie_df['Title'].apply(preprocess)
-
     #Apply levenstein distance
     levenstein_distances(user_input_value, movie_df)
 
     # Apply TF-IDF vectorization
     vectorizer = TfidfVectorizer()
-    tfidf_matrix = vectorizer.fit_transform(movie_df['Preprocessed_title'])
+    tfidf_matrix = vectorizer.fit_transform(movie_df['Preprocessed_Title'])
 
     # Vectorize user input
     user_vector = vectorizer.transform([user_input_value])
@@ -90,7 +87,7 @@ def calculate_similarity_with_tfid(user_input_value, movie_df):
     # Sort by similarity scores in descending order
     movie_df = movie_df.sort_values(by=[similarity_column, 'Levenstein distance'], ascending=[False, True])
 
-    return movie_df[['Release Year', 'Title', 'Genre', similarity_column, 'Levenstein distance', 'Preprocessed_title']]
+    return movie_df[['Release Year', 'Title', 'Genre', similarity_column, 'Levenstein distance', 'Preprocessed_Title']]
 
 
 def calculate_similarity_with_jaccard(user_input_value, movie_df):
@@ -101,7 +98,7 @@ def calculate_similarity_with_jaccard(user_input_value, movie_df):
     # Convert the preprocessed text into binary vectors (1 if the word is present, 0 otherwise)
     vectorizer = CountVectorizer(binary=True)
     user_vector = vectorizer.fit_transform([user_input_value])
-    movie_vectors = vectorizer.transform(movie_df['Preprocessed_title'])
+    movie_vectors = vectorizer.transform(movie_df['Preprocessed_Title'])
 
     # Calculate Jaccard similarity
     similarity_scores = calculate_jaccard_similarity(user_vector, movie_vectors)
@@ -113,7 +110,7 @@ def calculate_similarity_with_jaccard(user_input_value, movie_df):
     # Sort by similarity scores in descending order
     movie_df = movie_df.sort_values(by=[similarity_column, 'Levenstein distance'], ascending=[False, True])
 
-    return movie_df[['Release Year', 'Title', 'Genre', similarity_column, 'Levenstein distance', 'Preprocessed_title']]
+    return movie_df[['Release Year', 'Title', 'Genre', similarity_column, 'Levenstein distance', 'Preprocessed_Title']]
 
 
 def get_similar_movies(selected_movie_title, release_year, results):
