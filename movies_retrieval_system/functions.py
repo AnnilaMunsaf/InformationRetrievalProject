@@ -33,40 +33,12 @@ def create_inverted_index(df):
 
     return inverted_index
 
-def calculate_similarity_with_tfid(user_input_value, movie_df):
-    # Preprocess user input
-    preprocessed_user_input = preprocess(user_input_value)
-
-    # Preprocess movie plots
-    movie_df['Preprocessed_plot'] = movie_df['Plot'].apply(preprocess)
-
-    # Apply TF-IDF vectorization
-    vectorizer = TfidfVectorizer()
-    tfidf_matrix = vectorizer.fit_transform(movie_df['Preprocessed_plot'])
-
-    # Vectorize user input
-    user_vector = vectorizer.transform([preprocessed_user_input])
-
-    # Calculate cosine similarity
-    similarity_scores = cosine_similarity(user_vector, tfidf_matrix).flatten()
-
-    # Add similarity scores to the DataFrame
-    similarity_column = f'Similarity (TF-IDF)'
-    movie_df[similarity_column] = similarity_scores
-
-    # Sort by similarity scores in descending order
-    movie_df = movie_df.sort_values(by=similarity_column, ascending=False)
-
-    return movie_df[['Release Year', 'Title', similarity_column, 'Preprocessed_plot']]
 def calculate_similarity_with_tfid_using_inverted_index(user_input_value, movie_df,inverted_index):
     # TF-IDF Vectorization
     vectorizer = TfidfVectorizer()
 
     # Preprocess user input
     preprocessed_user_input = preprocess(user_input_value)
-
-    # Preprocess Plot
-    movie_df['Preprocessed_plot'] = movie_df['Plot'].apply(preprocess)
 
     # Retrieve relevant indices from inverted index
     user_tokens = word_tokenize(preprocessed_user_input)

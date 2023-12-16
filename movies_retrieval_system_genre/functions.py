@@ -94,8 +94,6 @@ def calculate_similarity_with_tfid(user_input_value, movie_df):
 
 
 def calculate_similarity_with_jaccard(user_input_value, movie_df):
-    # Preprocess movie titles
-    movie_df['Preprocessed_title'] = movie_df['Title'].apply(preprocess)
 
     # Apply levenstein distance
     levenstein_distances(user_input_value, movie_df)
