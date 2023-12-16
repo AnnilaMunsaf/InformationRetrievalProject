@@ -60,8 +60,10 @@ def get_movies(query):
     elif st.session_state.retrieval_method == "Jaccard Similarity":
         # Retrieve movies using Jaccard Similarity
         st.session_state.results = retrieve_movies_jaccard_similarity(query)
+        st.session_state.similarity_column = "Similarity (Jaccard)"
     elif st.session_state.retrieval_method == "Cosine Similarity":
         st.session_state.results = retrieve_movies_cosine_similarity(query)
+        st.session_state.similarity_column = "Similarity (TF-IDF)"
 
 
 def show():
@@ -76,7 +78,8 @@ def show():
         if st.session_state.results is not None:
             print(st.session_state.results)
             movie_titles_year = st.session_state.results.head(20)
-            movie_titles_year['MovieInfo'] = st.session_state.results['Title'] + ' (' + st.session_state.results['Release Year'].astype(str) + ')'
+            movie_titles_year['MovieInfo'] = st.session_state.results['Title'] + ' (' + st.session_state.results['Release Year'].astype(str) + ')'\
+                                             + ' (Similarity: ' + st.session_state.results[st.session_state.similarity_column].astype(str) +  ' , distance: ' + st.session_state.results['Levenstein distance'].astype(str) + ')'
 
         # Create a dropdown for the user to select a movie
             selected_movie_title = None
@@ -85,19 +88,20 @@ def show():
             st.write(f"Selected Movie: {st.session_state.selected_movie}")
 
             if st.session_state.selected_movie is not None:
-                selected_movie_title, release_year_str = st.session_state.selected_movie.split('(')
+                selected_movie_title, release_year_str, temp = st.session_state.selected_movie.split('(')
                 selected_movie_title = selected_movie_title.strip()
                 release_year = release_year_str.rstrip(')').strip()
 
+
                 st.session_state.selected_movie_genre = st.session_state.results.loc[(st.session_state.results['Title'] == selected_movie_title) &
-                                                   (st.session_state.results['Release Year'] == int(release_year))].iloc[0]['Genre']
+                                                   (st.session_state.results['Release Year'] == int(release_year.rstrip(')').strip()))].iloc[0]['Genre']
                 st.write(f"Genre of Movie: {st.session_state.selected_movie_genre}")
             # Display details of the selected movie
             if st.button("Show Similar Movies") and st.session_state.selected_movie is not None:
                 st.header("10 Similar Recommended Movies:")
 
                 # Check if similar movies list is not empty
-                similar_movies = get_similar_movies(selected_movie_title, release_year, st.session_state.results)
+                similar_movies = get_similar_movies(selected_movie_title, release_year.rstrip(')').strip(), st.session_state.results)
                 if not similar_movies.empty:
                     for idx, movie in enumerate(similar_movies.itertuples(), start=1):
                         if idx > 10:
@@ -108,7 +112,7 @@ def show():
 
                         st.write(f"{idx}. {title} ({release_year})")
                 else:
-                    st.info("No similar movies found.")
+                    st.info("No similar movies found..")
 
 
 
