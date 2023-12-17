@@ -6,7 +6,7 @@ import pandas as pd
 
 from functools import lru_cache
 # Load processed data
-movies_df, inverted_index_list = process_movie_data()
+movies_df = process_movie_data()
 
 # Define your information retrieval function
 def retrieve_movies_cosine_similarity(user_query):

@@ -10,7 +10,4 @@ def process_movie_data(file_path='./wiki_movie_plots_deduped.csv'):
     # Preprocess the plot column
     movies_df['Preprocessed_Title'] = movies_df['Title'].apply(preprocess)
 
-    # Create inverted index
-    inverted_index_list = create_inverted_index(movies_df)
-
-    return movies_df, inverted_index_list
+    return movies_df
