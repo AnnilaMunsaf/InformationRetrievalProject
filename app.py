@@ -80,12 +80,13 @@ def show():
     st.session_state.results = None
     st.button("Search", on_click=get_movies(st.session_state.query))
 
-    st.header("Top 10 Movies:")
-
 
     if st.session_state.results is not None:
+        st.header("Top 10 Movies:")
         st.write(st.session_state.results)
     else:
-        st.warning("No movies found.")
+        if st.session_state.query:
+            st.warning("No movies found.")
+
 
 show()
