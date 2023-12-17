@@ -32,8 +32,11 @@ There are two python files from where can launch our app namely:
 - app.py
 - app_genre.py
 
-![ScreenShot](./cosine.png)
-![ScreenShot](./winnieCosine2.png)
+<p align="center">
+  <img src="./cosine.png" width="300" alt="Cosine Screenshot">
+  <img src="./winnieCosine2.png" width="300" alt="Winnie Cosine Screenshot">
+</p>
+
 
 ## Libraries :
 
