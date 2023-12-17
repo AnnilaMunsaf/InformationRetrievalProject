@@ -42,7 +42,7 @@ There are two python files from where can launch our app namely:
 
 First use following command to install requirements:
 - pip install -r requirements.txt
-- 
+
 To launch the app, use following commands:
 - streamlit run app.py
 - streamlit run app_genre.py
