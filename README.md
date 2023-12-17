@@ -32,6 +32,9 @@ There are two python files from where can launch our app namely:
 - app.py
 - app_genre.py
 
+![ScreenShot](./cosine.png)
+![ScreenShot](./winnieCosine2.png)
+
 ## Libraries :
 
 - pandas~=2.0.3
