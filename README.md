@@ -33,8 +33,8 @@ There are two python files from where can launch our app namely:
 - app_genre.py
 
 <p align="center">
-  <img src="./cosine.png" width="300" alt="Cosine Screenshot">
-  <img src="./winnieCosine2.png" width="300" alt="Winnie Cosine Screenshot">
+  <img src="./cosine.png" width="400" alt="Cosine Screenshot">
+  <img src="./winnieCosine2.png" width="400" alt="Winnie Cosine Screenshot">
 </p>
 
 
